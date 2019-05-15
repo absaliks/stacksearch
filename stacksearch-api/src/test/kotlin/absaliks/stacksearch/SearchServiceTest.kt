@@ -8,8 +8,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestOperations
-import org.springframework.web.client.getForObject
 import java.time.Instant
 
 
@@ -37,15 +38,14 @@ class SearchServiceTest {
                 Question(
                     givenQuery,
                     givenPage.toString(),
-                    givenSize.toString(),
                     Owner("John Doe"),
                     Instant.MIN
                 )
             ), true
         )
 
-        `when`(restOperationsMock.getForObject<Page<Question>>(REMOTE_URL, expectedParameters))
-            .thenReturn(expectedPage)
+        `when`(restOperationsMock.exchange(REMOTE_URL, HttpMethod.GET, null, typeRef<Page<Question>>(), expectedParameters))
+            .thenReturn(ResponseEntity.ok(expectedPage))
 
         val results = service.searchQuestions(criteria)
 

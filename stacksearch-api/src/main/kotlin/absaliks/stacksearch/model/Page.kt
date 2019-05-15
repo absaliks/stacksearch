@@ -2,7 +2,6 @@ package absaliks.stacksearch.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-
 fun <T> emptyPage(): Page<T> = Page(emptyList(), false)
 
 data class Page<T>(

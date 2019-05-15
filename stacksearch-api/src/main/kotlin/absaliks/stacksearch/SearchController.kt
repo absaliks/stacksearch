@@ -2,13 +2,14 @@ package absaliks.stacksearch
 
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+
+const val SEARCH_PATH: String = "/search"
 
 @RestController
 @RequestMapping
 class SearchController(private val service: SearchService) {
 
-    @GetMapping("/search")
-    fun search(@RequestParam criteria: SearchCriteria) = service.searchQuestions(criteria)
+    @GetMapping(SEARCH_PATH)
+    fun search(criteria: SearchCriteria) = service.searchQuestions(criteria)
 }
