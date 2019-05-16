@@ -7,12 +7,14 @@ import {SearchResultsComponent} from './search-results/search-results.component'
 import {
   MatButtonModule,
   MatFormFieldModule,
+  MatIconModule,
   MatInputModule,
-  MatPaginatorModule,
-  MatSortModule,
-  MatTableModule
+  MatSelectModule,
+  MatTableModule,
+  MatToolbarModule
 } from '@angular/material';
 import {HttpClientModule} from "@angular/common/http";
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -22,13 +24,15 @@ import {HttpClientModule} from "@angular/common/http";
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
     HttpClientModule,
+    MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
-    MatButtonModule
+    MatSelectModule,
+    MatTableModule,
+    MatToolbarModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

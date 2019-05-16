@@ -1,5 +1,5 @@
-import {AfterViewInit, Component, ViewChild} from '@angular/core';
-import {MatPaginator, MatTableDataSource} from '@angular/material';
+import {Component} from '@angular/core';
+import {MatTableDataSource} from '@angular/material';
 import {Question} from "../model/question.model";
 import {SearchService} from "./search.service";
 
@@ -7,27 +7,50 @@ import {SearchService} from "./search.service";
   selector: 'app-search-results',
   templateUrl: './search-results.component.html',
   styleUrls: ['./search-results.component.scss'],
-  providers: [SearchService]
+  providers: [
+    SearchService
+  ]
 })
-export class SearchResultsComponent implements AfterViewInit {
+export class SearchResultsComponent {
 
-  query = 'kotlin';
+  page = 0;
+  pageSizes = [5, 15, 25, 50];
+  pageSize = 15;
+  hasMore = false;
+  rangeLabel = '';
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  query = '';
+  private lastQuery: string;
+
   dataSource: MatTableDataSource<Question> = new MatTableDataSource([]);
-
   displayedColumns = ['title', 'owner', 'createdOn'];
 
   constructor(private service: SearchService) {
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    // this.paginator.page.subscribe(this.search())
+  setPage(page: number) {
+    this.page = page;
+    this.loadData();
   }
 
   search() {
-    this.service.search(this.query, this.paginator.pageIndex, this.paginator.pageSize)
-        .subscribe(data => this.dataSource.data = data.items)
+    this.lastQuery = this.query;
+    this.loadData();
+  }
+
+  private loadData() {
+    this.service.search(this.lastQuery, this.page, this.pageSize)
+      .subscribe(page => {
+        this.dataSource.data = page.items;
+        this.updatePaginator(page.has_more);
+      });
+  }
+
+  private updatePaginator(hasMore: boolean) {
+    const startIndex = this.page * this.pageSize;
+    const endIndex = startIndex + this.dataSource.data.length;
+    const total = hasMore ? endIndex + '+' : endIndex;
+    this.rangeLabel = `${startIndex + 1} - ${endIndex} of ${total}`;
+    this.hasMore = hasMore;
   }
 }
