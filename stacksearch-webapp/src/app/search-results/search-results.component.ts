@@ -1,21 +1,23 @@
-import {Component} from '@angular/core';
-import {MatTableDataSource} from '@angular/material';
+import {Component, OnDestroy} from '@angular/core';
+import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatSnackBar, MatTableDataSource} from '@angular/material';
 import {Question} from "../model/question.model";
 import {SearchService} from "./search.service";
-import {Observable, Subject} from "rxjs";
-import {Page} from "../model/page.model";
+import {of, Subject, Subscription} from "rxjs";
+import {emptyPage} from "../model/page.model";
 import {SearchCriteria} from "../model/search-criteria.model";
-import {debounceTime, distinctUntilChanged, switchMap} from "rxjs/operators";
+import {catchError, debounceTime, distinctUntilChanged, switchMap, timeout} from "rxjs/operators";
 
 @Component({
   selector: 'app-search-results',
   templateUrl: './search-results.component.html',
   styleUrls: ['./search-results.component.scss'],
   providers: [
-    SearchService
+    SearchService,
+    MatSnackBar,
+    {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 2500}}
   ]
 })
-export class SearchResultsComponent {
+export class SearchResultsComponent implements OnDestroy {
 
   page = 0;
   pageSizes = [5, 15, 25, 50];
@@ -23,25 +25,40 @@ export class SearchResultsComponent {
   hasMore = false;
   rangeLabel = '';
 
+  loading = false;
   query = '';
   private lastQuery: string;
 
   dataSource: MatTableDataSource<Question> = new MatTableDataSource([]);
   displayedColumns = ['title', 'owner', 'createdOn'];
 
-  private readonly data$: Observable<Page<Question>>;
+  private readonly data$: Subscription;
   private readonly searchTerms$ = new Subject<SearchCriteria>();
 
-  constructor(private service: SearchService) {
+  constructor(private service: SearchService,
+              private snackBar: MatSnackBar) {
     this.data$ = this.searchTerms$.pipe(
       debounceTime(24),
       distinctUntilChanged(),
-      switchMap(request => this.service.search(request))
-    );
-    this.data$.subscribe(page => {
+      switchMap(request =>
+        this.service.search(request).pipe(
+          timeout(20000),
+          catchError(err => {
+            const errorMessage = 'Unable to get data';
+            console.error(errorMessage, JSON.stringify(err));
+            this.snackBar.open(errorMessage);
+            return of(emptyPage());
+          })
+      ))
+    ).subscribe(page => {
       this.dataSource.data = page.items;
       this.updatePaginator(page.has_more);
+      this.loading = false;
     })
+  }
+
+  ngOnDestroy() {
+    this.data$.unsubscribe();
   }
 
   setPage(page: number) {
@@ -55,6 +72,7 @@ export class SearchResultsComponent {
   }
 
   private loadData() {
+    this.loading = true;
     this.searchTerms$.next({
       query: this.lastQuery,
       page: this.page,

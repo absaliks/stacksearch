@@ -10,6 +10,7 @@ import {
   MatIconModule,
   MatInputModule,
   MatSelectModule,
+  MatSnackBarModule,
   MatTableModule,
   MatToolbarModule
 } from '@angular/material';
@@ -30,6 +31,7 @@ import {FormsModule} from "@angular/forms";
     MatIconModule,
     MatInputModule,
     MatSelectModule,
+    MatSnackBarModule,
     MatTableModule,
     MatToolbarModule,
     FormsModule
