@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpMethod
-import java.util.function.Consumer
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 internal class SearchControllerIT {
@@ -36,6 +35,5 @@ internal class SearchControllerIT {
         val page = this.restTemplate.exchange(url, HttpMethod.GET, null, typeRef<Page<Question>>(), params).body ?: emptyPage()
 
         assertEquals(size, page.items.size)
-        page.items.forEach(Consumer { item -> assertTrue(item.title.contains(query, true))})
-    }
-}
+        page.items.forEach{assertTrue(it.title.contains(query, true))}
+    } }
